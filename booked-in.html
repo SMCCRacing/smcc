@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booked In Drivers</title>
+  <link href="styles.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .card {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 2rem auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 1rem 2rem;
+      text-align: left;
+    }
+    th {
+      background-color: #004080;
+    }
+    tr:not(:first-child) {
+      border-top: 1px solid #333;
+    }
+    .blue { color: #3ab4f2; }
+    .green { color: #4ade80; }
+    .red { color: #f87171; }
+    .yellow { color: #facc15; }
+  </style>
+</head>
+<body>
+<header style="width: 100%; background-color: #000; color: white; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;">
+  <div style="display: flex; align-items: center;">
+    <img src="images/logo-header.png" alt="SMCC Logo" style="height: 50px; width: auto; margin-right: 32px;" />
+    <nav>
+      <ul style="list-style: none; display: flex; gap: 24px; margin: 0; padding: 0; font-weight: bold; font-size: 16px;">
+        <li><a href="index.html" style="color: white; text-decoration: none;">Home</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+  <div style="display: flex; gap: 16px;">
+    <a href="https://www.facebook.com/groups/1752376451748500/" target="_blank">
+      <img src="images/facebook-icon.png" alt="Facebook" style="height: 30px; width: 30px;" />
+    </a>
+    <a href="mailto:sevenoaksmodelcarclug@gmail.com">
+      <img src="images/mail-icon.png" alt="Email" style="height: 30px; width: 30px;" />
+    
+    <a href="https://www.youtube.com/@SevenoaksModelCarClub" target="_blank">
+      <img src="images/youtube-icon.png" alt="YouTube" style="height: 30px; width: 30px;" />
+    </a>
+ 
+  </div>
+</header>
+  <main class="p-8">
+    <h1 class="text-4xl font-bold text-center mb-4">Booked In Drivers</h1>
+    <p class="text-center text-gray-400 mb-8">Check who’s already booked in for the next meeting below.</p>
+
+    <div class="card">
+      <div id="drivers-table">
+        <p>Loading driver list...</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function loadSheetData() {
+      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRMGbcxTWdThigY3QaAIUG0I9nSDeyQNbMyfOk_f0gwbEKrEyKcnPPftCCDViMeuZxEJRgoxZPZP-vQ/pub?gid=1261254767&single=true&output=csv";
+      const res = await fetch(url);
+      const csv = await res.text();
+      const rows = csv.split(/\r?\n/).map(row => row.split(","));
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      let classColIdx = -1;
+
+      rows.forEach((row, i) => {
+        const tr = document.createElement("tr");
+        row.forEach((cell, colIdx) => {
+          const content = cell.trim();
+          const cellText = content.toLowerCase();
+          const el = document.createElement(i === 0 ? "th" : "td");
+
+          if (i === 0) {
+            if (cellText === "class") classColIdx = colIdx;
+          } else if (colIdx === classColIdx) {
+            if (cellText.includes("touring")) el.classList.add("blue");
+            else if (cellText.includes("buggy")) el.classList.add("green");
+            else if (cellText.includes("tamiya")) el.classList.add("red");
+            else if (cellText.includes("short")) el.classList.add("yellow");
+          }
+
+          el.textContent = content;
+          tr.appendChild(el);
+        });
+
+        (i === 0 ? thead : tbody).appendChild(tr);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+
+      const container = document.getElementById("drivers-table");
+      container.innerHTML = "";
+      container.appendChild(table);
+    }
+
+    window.addEventListener("DOMContentLoaded", loadSheetData);
+  </script>
+</body>
+</html>
