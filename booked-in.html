@@ -7,29 +7,85 @@
   <title>Booked In Drivers - SMCC</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <header>
-    <nav>
-      <img src="assets/logo.png" alt="SMCC Logo" class="logo" />
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="race-calendar.html">Race Calendar</a></li>
-        <li><a href="classes.html">Classes</a></li>
-        <li><a href="results.html">Results</a></li>
-        <li><a href="news.html">News</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
+<body class="bg-black text-white">
+<main class="min-h-screen bg-black text-white p-8">
+  <h1 class="text-4xl font-bold mb-4 text-center">Booked In Drivers</h1>
+  <p class="text-lg mb-6 text-center text-gray-300">Check who’s already booked in for the next meeting.</p>
 
-  <main class="content">
-    <h1>Booked In Drivers</h1>
-    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRMGbcxTWdThigY3QaAIUG0I9nSDeyQNbMyfOk_f0gwbEKrEyKcnPPftCCDViMeuZxEJRgoxZPZP-vQ/pubhtml?gid=1261254767&single=true&widget=true&headers=false" 
-            width="100%" height="700" frameborder="0"></iframe>
-  </main>
+  <div id="drivers-table" class="max-w-4xl mx-auto bg-[#111] rounded-2xl shadow-xl border border-gray-800 overflow-x-auto p-4">
+    <p>Loading driver list...</p>
+  </div>
 
-  <footer>
-    <p>© 2025 Sevenoaks Model Car Club</p>
-  </footer>
+  
+<script>
+  async function loadSheetData() {
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRMGbcxTWdThigY3QaAIUG0I9nSDeyQNbMyfOk_f0gwbEKrEyKcnPPftCCDViMeuZxEJRgoxZPZP-vQ/pub?gid=1261254767&single=true&output=csv";
+    const res = await fetch(url);
+    const csv = await res.text();
+    const rows = csv.split(/\r?\n/).map(row => row.split(","));
+
+    let classColIdx = -1;
+
+    const table = document.createElement("table");
+    table.className = "w-full text-left text-white border-collapse table-fixed";
+
+    const thead = document.createElement("thead");
+    const tbody = document.createElement("tbody");
+
+    rows.forEach((row, i) => {
+      const tr = document.createElement("tr");
+
+      row.forEach((cell, colIdx) => {
+        const content = cell.trim();
+        const cellText = content.toLowerCase();
+        const el = document.createElement(i === 0 ? "th" : "td");
+
+        el.className = "p-3 px-6 w-1/2";
+
+        if (i === 0 && cellText === "class") {
+          classColIdx = colIdx;
+        }
+
+        // Color coding on class column
+        if (i !== 0 && colIdx === classColIdx) {
+          el.classList.add("font-semibold");
+          if (cellText.includes("touring")) {
+            el.classList.add("text-blue-400");
+          } else if (cellText.includes("buggy")) {
+            el.classList.add("text-green-400");
+          } else if (cellText.includes("tamiya")) {
+            el.classList.add("text-red-400");
+          } else if (cellText.includes("short")) {
+            el.classList.add("text-yellow-300");
+          }
+        }
+
+        el.textContent = content;
+        tr.appendChild(el);
+      });
+
+      if (i === 0) {
+        tr.className = "bg-blue-800 text-white";
+        thead.appendChild(tr);
+      } else {
+        tr.className = "border-t border-gray-700";
+        tbody.appendChild(tr);
+      }
+    });
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    const container = document.getElementById("drivers-table");
+    container.innerHTML = "";
+    container.appendChild(table);
+  }
+
+  window.addEventListener("DOMContentLoaded", loadSheetData);
+</script>
+
+</main>
 </body>
+
+
 </html>
